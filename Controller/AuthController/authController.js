@@ -134,7 +134,7 @@ exports.registerSeller = catchAsync(async (req, res, next) => {
         const savedSeller = await newSeller.save();
         res.status(201).json(savedSeller);
     } catch (error) {
-        res.status(500).json(error);
+        res.status(501).json(error);
     }
 
 });
