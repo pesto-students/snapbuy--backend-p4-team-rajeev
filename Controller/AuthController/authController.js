@@ -67,9 +67,9 @@ exports.registerShopper = catchAsync(async (req, res, next) => {
     // Verify If Mail Id exists
     const data = await Shopper.findOne({ "email": req.body.email });
     console.log(data);
-    if(data !== null){
+    
     data && res.status(500).json("Mail id already Exists");
-    }
+   
 
     const newShopper = new Shopper({
         firstname: req.body.firstname,
