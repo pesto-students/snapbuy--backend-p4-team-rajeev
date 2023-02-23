@@ -147,7 +147,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
         if (req.body.role === "shopper") {
             const user = await Shopper.findOne({ email: req.body.email });
-            !user && res.status(401).json("Wrong Credentials!");
+            !user && res.status(401).json("Wrong Credentials!2");
 
             const hashedPassword = CryptoJS.AES.decrypt(user.password, process.env.PASS_SEC);
             const Originalpassword = hashedPassword.toString(CryptoJS.enc.Utf8);
@@ -169,7 +169,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
         } else if (req.body.role == "seller") {
             const user = await Seller.findOne({ email: req.body.email });
-            !user && res.status(401).json("Wrong Credentials!");
+            !user && res.status(401).json("Wrong Credentials!1");
 
             const hashedPassword = CryptoJS.AES.decrypt(user.password, process.env.PASS_SEC);
             const Originalpassword = hashedPassword.toString(CryptoJS.enc.Utf8);
