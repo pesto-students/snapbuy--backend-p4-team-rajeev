@@ -152,9 +152,11 @@ exports.login = catchAsync(async (req, res, next) => {
             const hashedPassword = CryptoJS.AES.decrypt(user.password, process.env.PASS_SEC);
             const Originalpassword = hashedPassword.toString(CryptoJS.enc.Utf8);
 
-            Originalpassword !== req.body.password &&
+//             Originalpassword !== req.body.password &&
+//                 res.status(404).json("Wrong Password!");
+            if(Originalpassword !== req.body.password){
                 res.status(404).json("Wrong Password!");
-
+            } 
             const accessToken = jwt.sign({
                 id: user._id,
                 role: user.role,
@@ -172,9 +174,11 @@ exports.login = catchAsync(async (req, res, next) => {
             const hashedPassword = CryptoJS.AES.decrypt(user.password, process.env.PASS_SEC);
             const Originalpassword = hashedPassword.toString(CryptoJS.enc.Utf8);
 
-            Originalpassword !== req.body.password &&
+//             Originalpassword !== req.body.password &&
+//                 res.status(404).json("Wrong Password!");
+               if(Originalpassword !== req.body.password){
                 res.status(404).json("Wrong Password!");
-
+            }
             const accessToken = jwt.sign({
                 id: user._id,
                 role: user.role,
