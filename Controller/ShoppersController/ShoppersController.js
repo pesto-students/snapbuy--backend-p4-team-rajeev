@@ -11,6 +11,9 @@ exports.updateShopper = async (req, res) => {
         const updatedUser = await Shopper.findByIdAndUpdate(req.user.id, {
             $set: req.body
         }, {new: true});
+        if(req.user.password !== req.body.password ){
+         res.status(404).("password Wrong")
+        }
         res.status(200).json(updatedUser);
         
     } catch (error) {
