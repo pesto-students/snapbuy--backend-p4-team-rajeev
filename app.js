@@ -1,46 +1,46 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var app = express();
-var cors = require('cors');
-   
+const express = require('express');
+const app = express();
 
-// database Connection
-require('./Config/dbConnection');
+const cookieParser = require('cookie-parser')
+const bodyParser = require('body-parser')
+const fileUpload = require('express-fileupload')
+// const dotenv = require('dotenv');
+const path = require('path')
 
-app.set("view engine", "ejs");
+const errorMiddleware = require('./middlewares/errors')
 
-app.use(logger('dev'));
+// Setting up config file 
+if (process.env.NODE_ENV !== 'PRODUCTION') require('dotenv').config({ path: 'backend/config/config.env' })
+// dotenv.config({ path: 'backend/config/config.env' })
+
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use(cors());
-const routes = require('./Routes/index');
-
-app.use('/', routes);
-const directory = path.join(__dirname, 'productImages');
-app.use('/productImages', express.static(directory)); 
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser())
+app.use(fileUpload());
 
 
+// Import all routes
+const products = require('./routes/product');
+const auth = require('./routes/auth');
+const payment = require('./routes/payment');
+const order = require('./routes/order');
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+app.use('/api/v1', products)
+app.use('/api/v1', auth)
+app.use('/api/v1', payment)
+app.use('/api/v1', order)
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
+if (process.env.NODE_ENV === 'PRODUCTION') {
+    app.use(express.static(path.join(__dirname, '../frontend/build')))
 
-module.exports = app;
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, '../frontend/build/index.html'))
+    })
+}
+
+
+// Middleware to handle errors
+app.use(errorMiddleware);
+
+module.exports = app

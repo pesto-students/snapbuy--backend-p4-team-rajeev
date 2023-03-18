@@ -1,90 +1,41 @@
-#!/usr/bin/env node
+const app = require('./app')
+const connectDatabase = require('./config/database')
 
-/**
- * Module dependencies.
- */
+// const dotenv = require('dotenv');
+const cloudinary = require('cloudinary')
 
-var app = require('./app');
-var debug = require('debug')('express-app:server');
-var http = require('http');
+// Handle Uncaught exceptions
+process.on('uncaughtException', err => {
+    console.log(`ERROR: ${err.stack}`);
+    console.log('Shutting down due to uncaught exception');
+    process.exit(1)
+})
 
-/**
- * Get port from environment and store in Express.
- */
+// Setting up config file
+if (process.env.NODE_ENV !== 'PRODUCTION') require('dotenv').config({ path: 'backend/config/config.env' })
 
-var port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
+// dotenv.config({ path: 'backend/config/config.env' })
 
-/**
- * Create HTTP server.
- */
 
-var server = http.createServer(app);
+// Connecting to database
+connectDatabase();
 
-/**
- * Listen on provided port, on all network interfaces.
- */
+// Setting up cloudinary configuration
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+})
 
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
- 
-/**
- * Normalize a port into a number, string, or false.
- */
+const server = app.listen(process.env.PORT, () => {
+    console.log(`Server started on PORT: ${process.env.PORT} in ${process.env.NODE_ENV} mode.`)
+})
 
-function normalizePort(val) {
-  var port = parseInt(val, 10); // here,10  specifies parse into decimal system 
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
-  return false;
-}
-
-/**
- * Event listener for HTTP server "error" event.
- */
-
-function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
-
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
-
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
-}
-
-/**
- * Event listener for HTTP server "listening" event.
- */
-
-function onListening() {
-  var addr = server.address();  //returns the bound address containing the family name, and port of the server
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
-}
+// Handle Unhandled Promise rejections
+process.on('unhandledRejection', err => {
+    console.log(`ERROR: ${err.stack}`);
+    console.log('Shutting down the server due to Unhandled Promise rejection');
+    server.close(() => {
+        process.exit(1)
+    })
+})
